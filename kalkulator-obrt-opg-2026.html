@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator poreznih obveza – Obrti i OPG 2026</title>
+<style>
+  :root {
+    --primary:#1a56db; --primary-dark:#1e429f; --primary-light:#eff6ff;
+    --amber:#d97706; --amber-light:#fffbeb;
+    --green:#047857; --green-light:#ecfdf5;
+    --teal:#0891b2; --teal-light:#ecfeff;
+    --red:#dc2626; --red-light:#fef2f2;
+    --purple:#7c3aed; --purple-light:#f5f3ff;
+    --g50:#f9fafb; --g100:#f3f4f6; --g200:#e5e7eb;
+    --g400:#9ca3af; --g500:#6b7280; --g700:#374151; --g900:#111827;
+    --sh:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
+    --shm:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.05);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#eef2fb;color:var(--g900);font-size:15px;line-height:1.5}
+
+  /* HEADER */
+  .hdr{background:linear-gradient(135deg,#1e3a8a,#1a56db 60%,#2563eb);color:#fff;padding:1.75rem 1.5rem 1.5rem;text-align:center}
+  .hdr h1{font-size:1.6rem;font-weight:700;letter-spacing:-.02em}
+  .hdr p{margin-top:.35rem;opacity:.85;font-size:.9rem}
+  .hdr-b{display:flex;justify-content:center;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
+  .hb{display:inline-flex;align-items:center;gap:.3rem;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:9999px;padding:.2rem .65rem;font-size:.75rem;font-weight:500}
+  .banner{background:#fffbeb;border-top:3px solid #f59e0b;padding:.65rem 1.5rem;font-size:.83rem;color:#78350f;text-align:center}
+
+  /* LAYOUT */
+  .wrap{max-width:1340px;margin:0 auto;padding:1.25rem 1rem}
+  .mgrid{display:grid;grid-template-columns:400px 1fr;gap:1.25rem;align-items:start}
+
+  /* CARD */
+  .card{background:#fff;border-radius:.75rem;border:1px solid var(--g200);box-shadow:var(--sh);overflow:hidden}
+  .ch{padding:.85rem 1.25rem;border-bottom:1px solid var(--g100);font-weight:600;font-size:.92rem;background:var(--g50);display:flex;align-items:center;gap:.4rem}
+  .cb{padding:1.1rem 1.25rem}
+
+  /* FORM */
+  .fg{margin-bottom:.8rem}
+  .fl{display:block;font-size:.8rem;font-weight:600;color:var(--g700);margin-bottom:.28rem}
+  .hint{font-size:.72rem;color:var(--g400);margin-top:.22rem;line-height:1.4}
+  .hint.ok{color:var(--green)}.hint.warn{color:#92400e}
+  .iw{display:flex;border:1.5px solid var(--g200);border-radius:.45rem;overflow:hidden;background:#fff;transition:border-color .15s}
+  .iw:focus-within{border-color:var(--primary)}
+  .iw input,.iw select{flex:1;border:none;outline:none;padding:.5rem .7rem;font-size:.88rem;color:var(--g900);background:transparent;min-width:0}
+  .iw .af{background:var(--g100);border-left:1px solid var(--g200);padding:.5rem .6rem;color:var(--g500);font-size:.75rem;white-space:nowrap;display:flex;align-items:center}
+  select.full{width:100%;border:1.5px solid var(--g200);border-radius:.45rem;padding:.5rem .7rem;font-size:.88rem;outline:none;background:#fff;color:var(--g900);transition:border-color .15s}
+  select.full:focus{border-color:var(--primary)}
+
+  /* DIVIDER */
+  .sd{display:flex;align-items:center;gap:.55rem;margin:1.1rem 0 .8rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--g400)}
+  .sd::after{content:'';flex:1;height:1px;background:var(--g200)}
+
+  /* CHILD BUTTONS */
+  .cbtns{display:flex;gap:.3rem;flex-wrap:wrap}
+  .cbtn{width:36px;height:36px;border-radius:.4rem;border:1.5px solid var(--g200);background:#fff;cursor:pointer;font-size:.88rem;font-weight:600;color:var(--g500);transition:all .15s;display:flex;align-items:center;justify-content:center}
+  .cbtn.on{background:var(--primary);border-color:var(--primary);color:#fff}
+  .cbtn:hover:not(.on){border-color:var(--primary);color:var(--primary)}
+  .cinfo{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.55rem}
+  .cpill{background:var(--primary-light);border:1px solid #bfdbfe;border-radius:.35rem;padding:.3rem .5rem;font-size:.72rem}
+  .cpill .cpl{color:var(--g400)}.cpill .cpv{font-weight:700;color:var(--primary)}
+
+  /* TOGGLE */
+  .togrow{display:flex;align-items:center;gap:.55rem;background:var(--g50);border:1px solid var(--g200);border-radius:.45rem;padding:.55rem .75rem;margin-bottom:.75rem;cursor:pointer}
+  .togrow input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--primary)}
+  .togrow span{font-size:.82rem;font-weight:500;color:var(--g700)}
+
+  /* NEOP FIELDS */
+  .nf{display:grid;grid-template-columns:1fr auto;gap:.4rem;align-items:center;padding:.45rem 0;border-bottom:1px dashed var(--g200)}
+  .nf:last-child{border-bottom:none}
+  .nfl{font-size:.78rem;color:var(--g700)}.nfl2{font-size:.7rem;color:var(--g400);margin-top:.1rem}
+  .nfi{width:140px}.nfi .iw{width:100%}
+  .ntr{background:var(--teal-light);border:1px solid #a5f3fc;border-radius:.4rem;padding:.5rem .75rem;margin-top:.6rem;display:flex;justify-content:space-between;font-size:.82rem}
+  .ntr .ntl{font-weight:600;color:var(--teal)}.ntr .ntv{font-weight:700;color:var(--teal)}
+
+  /* EMPLOYEES */
+  .ec{background:var(--g50);border:1px solid var(--g200);border-radius:.5rem;padding:.6rem .7rem;margin-bottom:.45rem}
+  .eh{display:flex;justify-content:space-between;align-items:center;margin-bottom:.45rem}
+  .et{font-size:.78rem;font-weight:600;color:var(--g700)}
+  .ecost{font-size:.72rem;color:var(--primary);font-weight:600}
+  .ef{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;align-items:end}
+  .fl2{font-size:.7rem;color:var(--g500);margin-bottom:.18rem}
+  .brm{background:var(--red-light);color:var(--red);border:1px solid #fecaca;border-radius:.35rem;width:26px;height:26px;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .badd{width:100%;background:var(--primary-light);color:var(--primary);border:1.5px dashed #93c5fd;border-radius:.45rem;padding:.5rem;cursor:pointer;font-size:.82rem;font-weight:500;margin-top:.2rem;transition:background .15s}
+  .badd:hover{background:#dbeafe}
+  .noemp{font-size:.78rem;color:var(--g400);font-style:italic;margin-bottom:.4rem}
+
+  /* RAZRED */
+  .rzbox{background:var(--primary-light);border:1px solid #bfdbfe;border-radius:.6rem;padding:.85rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+  .rzn{background:var(--primary);color:#fff;font-size:1.5rem;font-weight:800;width:50px;height:50px;border-radius:.45rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .rzi{flex:1}.rzl{font-size:.7rem;color:var(--primary);font-weight:600;text-transform:uppercase}
+  .rzr{font-size:.88rem;font-weight:600}
+  .rzch{background:#fff;border:1px solid var(--g200);border-radius:.35rem;padding:.35rem .55rem;text-align:center;min-width:90px}
+  .rzl2{font-size:.68rem;color:var(--g400)}.rzv{font-size:.9rem;font-weight:700}.rzs{font-size:.68rem;color:var(--g400)}
+
+  /* RESULTS */
+  .rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;margin-bottom:1.1rem}
+  .rc{background:#fff;border-radius:.7rem;border:2px solid var(--g200);overflow:hidden;box-shadow:var(--sh)}
+  .rc.win{border-color:var(--green);box-shadow:0 0 0 3px rgba(4,120,87,.1),var(--shm)}
+
+  .rh{padding:.85rem .9rem;text-align:center}
+  .rh.hs{background:linear-gradient(135deg,#eff6ff,#dbeafe)}
+  .rh.hn{background:linear-gradient(135deg,#fffbeb,#fef3c7)}
+  .rh.hd{background:linear-gradient(135deg,#ecfdf5,#d1fae5)}
+  .rht{font-weight:700;font-size:.9rem}.rhs{font-size:.72rem;margin-top:.1rem;opacity:.7}
+  .rhb{display:inline-block;border-radius:9999px;padding:.12rem .5rem;font-size:.68rem;font-weight:600;margin-top:.3rem}
+  .bw{background:#d1fae5;color:#065f46}.bx{background:#fee2e2;color:#991b1b}.bn{background:#e0f2fe;color:#0c4a6e}
+
+  .rb{padding:.8rem .9rem}
+  .rr{display:flex;justify-content:space-between;align-items:baseline;padding:.28rem 0;font-size:.8rem;border-bottom:1px solid var(--g100);gap:.4rem}
+  .rr:last-child{border-bottom:none}
+  .rr .rl{color:var(--g500);flex:1;line-height:1.3}.rr .rv{font-weight:500;white-space:nowrap}
+  .rr .rv.n{color:var(--red)}.rr .rv.g{color:var(--green)}.rr .rv.t{color:var(--teal)}
+  .rr.sub{padding-left:.9rem;font-size:.75rem;opacity:.9}
+  .rr.hl{background:var(--g50);margin:0 -.15rem;padding-left:.15rem;border-radius:.2rem}
+  .rr.thl{background:var(--teal-light);margin:0 -.15rem;padding-left:.15rem;border-radius:.2rem}
+  .rr.ghl{background:var(--green-light);margin:0 -.15rem;padding-left:.15rem;border-radius:.2rem}
+  .rr.phl{background:var(--purple-light);margin:0 -.15rem;padding-left:.15rem;border-radius:.2rem}
+
+  .rtot{background:var(--g50);border-radius:.45rem;padding:.55rem .65rem;margin:.65rem 0 0;display:flex;justify-content:space-between;align-items:center}
+  .rtot .tl{font-weight:600;font-size:.82rem}.rtot .tv{font-weight:700;font-size:.95rem;color:var(--red)}
+
+  .nb{border-radius:.45rem;padding:.65rem;text-align:center;margin-top:.55rem}
+  .nb.pos{background:var(--green-light)}.nb.neg{background:var(--red-light)}
+  .nl{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--g500)}
+  .ne{font-size:1.25rem;font-weight:800;margin:.08rem 0}
+  .nb.pos .ne{color:var(--green)}.nb.neg .ne{color:var(--red)}
+  .nm{font-size:.72rem;color:var(--g400)}
+  .nb-note{font-size:.7rem;margin-top:.3rem;padding-top:.3rem;border-top:1px solid rgba(0,0,0,.08);color:var(--g500)}
+
+  /* NEOPOREZIVI VLASNIK BENEFIT BOX */
+  .nob{background:var(--teal-light);border:1px solid #67e8f9;border-radius:.45rem;padding:.5rem .65rem;margin-top:.5rem;font-size:.75rem}
+  .nob .ntitle{font-weight:700;color:var(--teal);margin-bottom:.2rem}
+  .nob-row{display:flex;justify-content:space-between;color:#0e7490}
+  .nob-row .nv{font-weight:700}
+
+  /* NO-NEOP-BENEFIT (paušal) */
+  .nonb{background:#fff7ed;border:1px solid #fed7aa;border-radius:.45rem;padding:.4rem .6rem;margin-top:.45rem;font-size:.73rem;color:#9a3412}
+
+  /* COMPARISON */
+  .comp{background:#fff;border-radius:.7rem;border:1px solid var(--g200);padding:1.1rem;box-shadow:var(--sh);margin-bottom:1.1rem}
+  .comp h3{font-size:.87rem;font-weight:700;margin-bottom:.85rem;color:var(--g700)}
+  .brow{margin-bottom:.75rem}
+  .bmeta{display:flex;justify-content:space-between;margin-bottom:.28rem;font-size:.78rem}
+  .btrack{height:21px;background:var(--g100);border-radius:4px;overflow:hidden}
+  .bfill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;color:#fff;font-size:.7rem;font-weight:600;transition:width .4s ease}
+
+  .ncmp{margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--g200)}
+  .ncmp h4{font-size:.75rem;font-weight:600;color:var(--g400);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.05em}
+  .nrow{display:flex;justify-content:space-between;font-size:.82rem;padding:.22rem 0}
+  .nrow.best{background:var(--green-light);margin:0 -.4rem;padding:.3rem .4rem;border-radius:.35rem}
+  .nrv{font-weight:700}.nrv.p{color:var(--green)}.nrv.ng{color:var(--red)}
+
+  /* REC */
+  .rec{background:#fff;border-radius:.7rem;border:1px solid var(--g200);padding:1.1rem;box-shadow:var(--sh);margin-bottom:1.1rem}
+  .rec h3{font-size:.87rem;font-weight:700;color:var(--g700);margin-bottom:.65rem}
+  .rec p{font-size:.83rem;color:var(--g700);line-height:1.6}.rec p+p{margin-top:.5rem}
+
+  /* NOTES */
+  .notes{background:var(--g50);border-radius:.7rem;border:1px solid var(--g200);padding:1rem 1.1rem;font-size:.76rem;color:var(--g500)}
+  .notes h4{font-size:.8rem;font-weight:600;color:var(--g700);margin-bottom:.45rem}
+  .notes ul{padding-left:1.1rem}.notes li{margin-bottom:.28rem;line-height:1.4}
+  .notes .src{margin-top:.65rem;padding-top:.55rem;border-top:1px solid var(--g200);font-size:.72rem}
+
+  .alert{background:#fef2f2;border:1px solid #fca5a5;border-radius:.55rem;padding:1rem 1.1rem;color:#7f1d1d;font-size:.88rem;text-align:center;grid-column:1/-1}
+  @media(max-width:980px){.mgrid,.rgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>🧮 Kalkulator poreznih obveza</h1>
+  <p>Mali obrti i OPG · Paušalno vs. dohodovno oporezivanje · Hrvatska 2026</p>
+  <div class="hdr-b">
+    <span class="hb">📋 Paušal – stari sustav</span>
+    <span class="hb">⚠️ Vladini paket 2026</span>
+    <span class="hb">📒 Dohodovni obrt</span>
+    <span class="hb">👶 Djeca na PK kartici</span>
+    <span class="hb">💰 Neoporezive isplate</span>
+  </div>
+</div>
+
+<div class="banner">
+  ⚠️ <strong>Vladini antiinflacijski paket (najava 28.5.2026.):</strong> Povećanje obveza za paušalne obrte s prihodima iznad 19.900 €. Mjere još nisu formalno stupile na snagu.
+</div>
+
+<div class="wrap">
+<div class="mgrid">
+
+<!-- ===== LIJEVO ===== -->
+<div>
+<div class="card">
+  <div class="ch">📝 Unos podataka</div>
+  <div class="cb">
+
+    <div class="fg">
+      <label class="fl">Godišnji prihodi (primitci)</label>
+      <div class="iw"><input type="number" id="prihodi" value="30000" min="0" max="500000" step="500" oninput="calc()"><span class="af">€ / god.</span></div>
+      <div class="hint" id="rzHint"></div>
+    </div>
+
+    <div class="fg">
+      <label class="fl">Stopa poreza na dohodak (lokalna)</label>
+      <select class="full" id="taxRate" onchange="calc()">
+        <option value="0.18">18% – Rijeka i neke jedinice</option>
+        <option value="0.20" selected>20% – Većina gradova i općina</option>
+        <option value="0.22">22% – Neka veća gradska područja</option>
+        <option value="0.23">23% – Zagreb (max. stopa)</option>
+      </select>
+      <div class="hint">Utječe samo na dohodovni obrt.</div>
+    </div>
+
+    <div class="sd">💼 Poslovni troškovi (godišnje)</div>
+    <div class="fg"><label class="fl">Poslovni prostor (najamnina / leasing)</label><div class="iw"><input type="number" id="c_p" value="0" min="0" step="50" oninput="calc()"><span class="af">€/god.</span></div></div>
+    <div class="fg"><label class="fl">Materijali, roba, poluproizvodi</label><div class="iw"><input type="number" id="c_m" value="0" min="0" step="100" oninput="calc()"><span class="af">€/god.</span></div></div>
+    <div class="fg"><label class="fl">Režije (struja, voda, plin, internet, tel.)</label><div class="iw"><input type="number" id="c_r" value="0" min="0" step="50" oninput="calc()"><span class="af">€/god.</span></div></div>
+    <div class="fg"><label class="fl">Prijevoz i gorivo</label><div class="iw"><input type="number" id="c_v" value="0" min="0" step="50" oninput="calc()"><span class="af">€/god.</span></div></div>
+    <div class="fg"><label class="fl">Računovodstvo i administracija</label><div class="iw"><input type="number" id="c_a" value="0" min="0" step="50" oninput="calc()"><span class="af">€/god.</span></div></div>
+    <div class="fg"><label class="fl">Ostali poslovni troškovi</label><div class="iw"><input type="number" id="c_o" value="0" min="0" step="50" oninput="calc()"><span class="af">€/god.</span></div></div>
+
+    <div class="sd">👶 Djeca vlasnika (porezna kartica)</div>
+    <div class="fg">
+      <label class="fl">Broj djece na poreznoj kartici vlasnika</label>
+      <div class="cbtns" id="cbtns"></div>
+      <div class="hint">Samo za dohodovni – povećava osobni odbitak.</div>
+      <div id="cinfo"></div>
+    </div>
+
+    <div class="sd">👥 Zaposlenici</div>
+    <div id="empList"></div>
+    <button class="badd" onclick="addEmp()">+ Dodaj zaposlenika</button>
+    <div class="hint" style="margin-top:.35rem">Trošak poslodavca = bruto × 1,165 (+ 16,5% HZZO na plaću) × 12 mj.</div>
+
+    <div class="sd">💰 Neoporezive isplate (godišnje, po osobi)</div>
+
+    <!-- *** KLJUČNA NAPOMENA *** -->
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:.45rem;padding:.6rem .75rem;margin-bottom:.75rem;font-size:.78rem;color:#14532d">
+      <strong>💡 Kako ovo funkcionira:</strong><br>
+      <strong>Zaposlenici:</strong> neoporezive isplate su pravi trošak poslodavca (novac odlazi).<br>
+      <strong>Vlasnik dohodovnog obrta:</strong> neoporezive isplate su <em>rashod koji smanjuje poreznu osnovicu</em> — porez se smanjuje za iznos × porezna stopa — <em>ali novac ostaje vlasniku</em>. Dvostruki učinak.<br>
+      <strong>Vlasnik paušalnog obrta:</strong> novac ostaje vlasniku, ali paušalni porez je fiksan — nema porezne uštede.
+    </div>
+
+    <label class="togrow">
+      <input type="checkbox" id="neop_v" onchange="calc()">
+      <span>Isplaćuju se i vlasniku obrta</span>
+    </label>
+
+    <div class="nf">
+      <div><div class="nfl">🍽️ Naknada za prehranu (topli obrok)</div><div class="nfl2">Limit: do 1.200 €/god. (1.800 € na temelju računa)</div></div>
+      <div class="nfi"><div class="iw"><input type="number" id="n_h" value="0" min="0" max="1800" step="50" oninput="calc()"><span class="af">€</span></div></div>
+    </div>
+    <div class="nf">
+      <div><div class="nfl">🚗 Naknada za prijevoz</div><div class="nfl2">Stvarni trošak javnog prijevoza ili 0,50 €/km privatnim</div></div>
+      <div class="nfi"><div class="iw"><input type="number" id="n_p" value="0" min="0" step="50" oninput="calc()"><span class="af">€</span></div></div>
+    </div>
+    <div class="nf">
+      <div><div class="nfl">🎄 Prigodne nagrade (Božičnica, regres, uskrsnica)</div><div class="nfl2">Limit: do 700 €/god. ukupno</div></div>
+      <div class="nfi"><div class="iw"><input type="number" id="n_b" value="0" min="0" max="700" step="50" oninput="calc()"><span class="af">€</span></div></div>
+    </div>
+    <div class="nf">
+      <div><div class="nfl">🏆 Nagrade za radne rezultate (bonus, stimulacija)</div><div class="nfl2">Limit: do 1.200 €/god. (zasebna kategorija)</div></div>
+      <div class="nfi"><div class="iw"><input type="number" id="n_n" value="0" min="0" max="1200" step="50" oninput="calc()"><span class="af">€</span></div></div>
+    </div>
+    <div class="nf">
+      <div><div class="nfl">🎁 Dar za djecu zaposlenika (do 15 god.)</div><div class="nfl2">Limit: do 140 €/god. po djetetu zaposlenika</div></div>
+      <div class="nfi"><div class="iw"><input type="number" id="n_d" value="0" min="0" max="140" step="10" oninput="calc()"><span class="af">€</span></div></div>
+    </div>
+
+    <div class="ntr">
+      <span class="ntl">Po osobi / godišnje:</span>
+      <span class="ntv" id="neopPP">0,00 €</span>
+    </div>
+    <div class="hint" id="neopSummary"></div>
+
+  </div>
+</div>
+</div>
+
+<!-- ===== DESNO ===== -->
+<div>
+  <div id="rzCard" style="margin-bottom:1rem;"></div>
+  <div class="rgrid" id="rGrid"></div>
+  <div class="comp" id="compSection"></div>
+  <div id="recSection"></div>
+
+  <div class="notes">
+    <h4>⚠️ Napomene i ograničenja</h4>
+    <ul>
+      <li>Kalkulator je <strong>isključivo informativne prirode</strong>. Konzultirajte se s ovlaštenim knjigowođom ili poreznim savjetnikom.</li>
+      <li>Vladini paket (28.5.2026.) u fazi je najave – iznosi su temeljeni na vladinim tablicama i medijskim najavama.</li>
+      <li><strong>Neoporezive za vlasnika dohodovnog obrta:</strong> Vlasnik nije zaposlenik u formalnom smislu. Rashodi poput toplog obroka, prijevoza ili dnevnica mogu biti odbitni pod specifičnim uvjetima Pravilnika o porezu na dohodak. Raspišite se s knjigowođom za konkretnu situaciju.</li>
+      <li><strong>Djeca na PK kartici:</strong> Samo za dohodovni. Koeficijenti: 1. dijete 0,5 (300€/mj), 2. dijete 0,7 (420€/mj), 3. dijete 1,0 (600€/mj), 4. dijete 1,4 (840€/mj), 5. dijete 1,9 (1.140€/mj).</li>
+      <li><strong>Zaposlenici:</strong> Prikazuje trošak za poslodavca (bruto + HZZO na plaću). Neto plaća zaposlenika ovisi o njihovim osobnim odbicima.</li>
+      <li><strong>PDV prag:</strong> 60.000 € – prelazak povlači obvezan ulazak u PDV sustav.</li>
+    </ul>
+    <div class="src"><strong>Podaci:</strong> Porezna uprava RH · HOK · NN 150/2025 · Pravilnik o porezu na dohodak (izmjene 1.1.2025., provjera 20.4.2026.) · tportal.hr 28.5.2026. · mojafirma.hr · datasmart.hr</div>
+  </div>
+</div>
+
+</div></div>
+
+<script>
+// ============================================================
+// KONSTANTE
+// ============================================================
+const BRACKETS = [
+  {r:1,max:11300, lbl:'do 11.300 €',      stO:3695.16,nwO:3695.16},
+  {r:2,max:15300, lbl:'11.300–15.300 €',  stO:3767.16,nwO:3767.16},
+  {r:3,max:19900, lbl:'15.300–19.900 €',  stO:3849.96,nwO:3849.96},
+  {r:4,max:30600, lbl:'19.900–30.600 €',  stO:4042.56,nwO:4352.00},
+  {r:5,max:40000, lbl:'30.600–40.000 €',  stO:4211.76,nwO:5248.00},
+  {r:6,max:50000, lbl:'40.000–50.000 €',  stO:4391.76,nwO:6546.00},
+  {r:7,max:60000, lbl:'50.000–60.000 €',  stO:4571.76,nwO:8324.00},
+];
+const PTAX  = [203.40,275.40,358.20,550.80,720.00,900.00,1080.00]; // paušalni porez po razredu
+const PCONT = 3491.76;   // stari paušalni doprinosi
+const DOH_C = 5674.08;   // dohodovni doprinosi vlasnika/god
+const BASE_O = 7200;     // osnovni osobni odbitak 600€/mj × 12
+const EPL = 0.165;       // HZZO na plaću (na teret poslodavca)
+const CMLY  = [300,420,600,840,1140]; // dječji odbitak po djetetu (€/mj)
+
+let employees = [];
+let nDjece = 0;
+
+// ============================================================
+// DJECA
+// ============================================================
+function renderCBtns() {
+  document.getElementById('cbtns').innerHTML =
+    [0,1,2,3,4,5].map(n=>`<button class="cbtn${n===nDjece?' on':''}" onclick="setDjeca(${n})">${n===5?'5+':n}</button>`).join('');
+  renderCInfo();
+}
+function setDjeca(n){nDjece=n;renderCBtns();calc();}
+function getOdbOsob(){
+  let d=BASE_O;
+  for(let i=0;i<Math.min(nDjece,5);i++) d+=CMLY[i]*12;
+  return d;
+}
+function renderCInfo(){
+  const el=document.getElementById('cinfo');
+  if(!nDjece){el.innerHTML='';return;}
+  const ext=getOdbOsob()-BASE_O;
+  let rows='';
+  for(let i=0;i<Math.min(nDjece,5);i++)
+    rows+=`<div class="cpill"><div class="cpl">${i+1}. dijete (k=${[0.5,0.7,1.0,1.4,1.9][i]})</div><div class="cpv">+${fmt(CMLY[i]*12)}/god.</div></div>`;
+  el.innerHTML=`<div class="cinfo" style="margin-top:.5rem">${rows}
+    <div class="cpill" style="background:#ecfdf5;border-color:#86efac;grid-column:1/-1">
+      <div class="cpl">Ukupni osobni odbitak</div>
+      <div class="cpv" style="color:#047857">${fmt(BASE_O)} + ${fmt(ext)} = ${fmt(BASE_O+ext)}/god.</div>
+    </div></div>`;
+}
+
+// ============================================================
+// ZAPOSLENICI
+// ============================================================
+function addEmp(){employees.push({name:'',bruto:1100});renderEmps();calc();}
+function remEmp(i){employees.splice(i,1);renderEmps();calc();}
+function renderEmps(){
+  const el=document.getElementById('empList');
+  if(!employees.length){el.innerHTML='<p class="noemp">Nema zaposlenika – kliknite + za dodavanje</p>';return;}
+  el.innerHTML=employees.map((e,i)=>`
+    <div class="ec">
+      <div class="eh">
+        <span class="et">Zaposlenik ${i+1}</span>
+        <div style="display:flex;align-items:center;gap:.45rem">
+          <span class="ecost">Trošak/god: ${fmt(e.bruto*(1+EPL)*12)}</span>
+          <button class="brm" onclick="remEmp(${i})">×</button>
+        </div>
+      </div>
+      <div class="ef">
+        <div><div class="fl2">Naziv/pozicija</div>
+          <div class="iw"><input type="text" value="${e.name}" placeholder="npr. konobar..." oninput="employees[${i}].name=this.value"></div></div>
+        <div><div class="fl2">Bruto plaća/mj</div>
+          <div class="iw"><input type="number" value="${e.bruto}" min="840" step="50"
+            oninput="employees[${i}].bruto=parseFloat(this.value)||0;renderEmps();calc()"><span class="af">€</span></div></div>
+      </div>
+    </div>`).join('');
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function gv(id){return parseFloat(document.getElementById(id).value)||0;}
+function fmt(n){
+  if(isNaN(n)||n===undefined)return'0,00 €';
+  const s=n<0?'−':'',a=Math.abs(n),p=a.toFixed(2).split('.');
+  p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  return s+p[0]+','+p[1]+' €';
+}
+function getBR(inc){for(const b of BRACKETS)if(inc<=b.max)return b;return null;}
+
+// ============================================================
+// GLAVNI IZRAČUN
+// ============================================================
+function calc(){
+  const inc  = gv('prihodi');
+  const tr   = parseFloat(document.getElementById('taxRate').value);
+  const costs= ['c_p','c_m','c_r','c_v','c_a','c_o'].reduce((s,id)=>s+gv(id),0);
+  const empC = employees.reduce((s,e)=>s+e.bruto*(1+EPL)*12,0);
+  const br   = getBR(inc);
+  const osobni = getOdbOsob();
+
+  // Neoporezive isplate
+  const pp   = [gv('n_h'),gv('n_p'),gv('n_b'),gv('n_n'),gv('n_d')].reduce((a,b)=>a+b,0); // po osobi
+  const vl   = document.getElementById('neop_v').checked;
+  const nEmp = pp * employees.length;  // pravi trošak (odlazi zaposlenicima)
+  const nOwn = vl ? pp : 0;            // rashod koji OSTAJE vlasniku
+  const nTot = nEmp + nOwn;            // ukupno za porezni odbitak u dohodovnom
+
+  // UI summary
+  document.getElementById('neopPP').textContent = fmt(pp);
+  const sh = document.getElementById('neopSummary');
+  const rec = employees.length + (vl?1:0);
+  if(rec>0 && pp>0){
+    sh.textContent = `Zaposlenici: ${fmt(nEmp)} (${employees.length}× ${fmt(pp)})${vl?' + vlasnik: '+fmt(nOwn)+' (↩ rashod, ostaje vlasniku)':''}`;
+    sh.className='hint ok';
+  } else { sh.textContent=''; sh.className='hint'; }
+
+  updateRzHint(inc,br);
+  renderRzCard(inc,br);
+
+  if(!br){
+    document.getElementById('rGrid').innerHTML='<div class="alert"><strong>⚠️ Prihodi prelaze 60.000 € godišnje</strong><br>Paušalni obrt nije dostupan iznad tog praga. Savjetujte se s knjigowođom.</div>';
+    document.getElementById('compSection').innerHTML='';
+    document.getElementById('recSection').innerHTML='';
+    return;
+  }
+
+  // ===== PAUŠAL STARI =====
+  // neop_own neutralno: izlazi i vraća se – ne ulazi u neto izračun
+  const ps_obl  = br.stO;
+  const ps_out  = ps_obl + empC + costs + nEmp;  // samo nEmp, NE nOwn
+  const ps_neto = inc - ps_out;
+
+  // ===== PAUŠAL NOVI =====
+  const pn_obl  = br.nwO;
+  const pn_diff = pn_obl - ps_obl;
+  const pn_out  = pn_obl + empC + costs + nEmp;
+  const pn_neto = inc - pn_out;
+
+  // ===== DOHODOVNI =====
+  // Porezni odbitak: nTot (I empC I nOwn smanjuju poreznu osnovicu)
+  const doh_dohodak = inc - costs - empC - nTot - DOH_C;
+  const doh_tb      = Math.max(0, doh_dohodak - osobni);
+  const doh_porez   = doh_tb > 60000 ? 60000*tr + (doh_tb-60000)*0.30 : doh_tb*tr;
+  const doh_stObl   = DOH_C + doh_porez;
+  // Neto: nOwn se vraća vlasniku → ne oduzimamo ga
+  const doh_out  = costs + empC + nEmp + DOH_C + doh_porez;
+  const doh_neto = inc - doh_out;
+  // Korist vlasnika od neoporezivog: porezna ušteda (a novac i dalje tu)
+  const own_saving = nOwn * tr;
+
+  const bestNeto = Math.max(ps_neto, pn_neto, doh_neto);
+
+  renderResults({
+    inc, costs, empC, tr, osobni,
+    neop:{pp, nEmp, nOwn, nTot, own_saving},
+    ps:{ obl:ps_obl, porez:PTAX[br.r-1], cont:PCONT, out:ps_out, neto:ps_neto },
+    pn:{ obl:pn_obl, diff:pn_diff, out:pn_out, neto:pn_neto },
+    doh:{ cont:DOH_C, dohodak:doh_dohodak, tb:doh_tb, porez:doh_porez, stObl:doh_stObl, out:doh_out, neto:doh_neto },
+    bestNeto
+  });
+}
+
+// ============================================================
+// RAZRED CARD
+// ============================================================
+function updateRzHint(inc,br){
+  const el=document.getElementById('rzHint');
+  if(!br){el.textContent='⚠️ Prihodi prelaze 60.000 € – izlazak iz paušalnog sustava';el.style.color='#dc2626';}
+  else{el.textContent=`✓ Paušalni razred ${br.r} (${br.lbl})`;el.style.color='#047857';}
+}
+function renderRzCard(inc,br){
+  const el=document.getElementById('rzCard');
+  if(!br){el.innerHTML='';return;}
+  const d=br.nwO-br.stO;
+  el.innerHTML=`<div class="rzbox">
+    <div class="rzn">${br.r}</div>
+    <div class="rzi">
+      <div class="rzl">Paušalni razred 2026</div>
+      <div class="rzr">${br.lbl}</div>
+      <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem">
+        Stare obveze: ${fmt(br.stO)} &nbsp;·&nbsp;
+        Nove: ${d>0?'<span style="color:#dc2626">'+fmt(br.nwO)+'</span>':'<span style="color:#047857">bez promjene</span>'}
+      </div>
+    </div>
+    <div class="rzch">
+      <div class="rzl2">Promjena (paket)</div>
+      <div class="rzv" style="color:${d>0?'#dc2626':'#047857'}">${d>0?'+'+fmt(d):'0,00 €'}</div>
+      <div class="rzs">${d>0?((d/br.stO*100).toFixed(0)+'% više'):'Nema promjene'}</div>
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// RENDER RESULTS
+// ============================================================
+function renderResults(d){
+  const{inc,costs,empC,tr,osobni,neop,ps,pn,doh,bestNeto}=d;
+  const bPS =Math.abs(ps.neto -bestNeto)<.01;
+  const bPN =!bPS&&Math.abs(pn.neto -bestNeto)<.01;
+  const bDoh=!bPS&&!bPN&&Math.abs(doh.neto-bestNeto)<.01;
+  const hC=costs>0, hE=empC>0;
+  const cExt=osobni-BASE_O;
+
+  // ----- PAUŠAL STARI -----
+  const cPS=`<div class="rc${bPS?' win':''}">
+    <div class="rh hs">
+      <div class="rht" style="color:#1e3a8a">Paušalni obrt</div>
+      <div class="rhs">Trenutni sustav 2026</div>
+      <span class="rhb ${bPS?'bw':'bn'}">${bPS?'✓ Povoljniji':'Stari sustav'}</span>
+    </div>
+    <div class="rb">
+      ${rr('Prihodi',inc)}
+      ${rr('<strong>Obveze prema državi</strong>',ps.obl,'n','hl')}
+      ${rr('— Paušalni porez',ps.porez,'','sub')}
+      ${rr('— Doprinosi vlasnika',ps.cont,'','sub')}
+      ${hE?rr('Trošak zaposlenika',empC,'n'):''}
+      ${hC?rr('Poslovni troškovi',costs,'n'):''}
+      ${neop.nEmp>0?rr('Neoporezive – zaposlenici',neop.nEmp,'n'):''}
+      ${neop.nOwn>0?`<div class="rr thl"><span class="rl">Neoporezive – vlasnik</span><span class="rv t">↩ ostaje vlasniku</span></div>`:''}
+      <div class="rtot"><span class="tl">Ukupni odljev</span><span class="tv">${fmt(ps.out)}</span></div>
+      ${neop.nOwn>0?`<div class="nonb">⚠ U paušalu nema porezne uštede od neoporezivih isplata vlasniku (${fmt(neop.nOwn)}/god.). Paušalni porez je fiksan bez obzira na rashode.</div>`:''}
+      ${nb(ps.neto, neop.nOwn, 0)}
+    </div>
+  </div>`;
+
+  // ----- PAUŠAL NOVI -----
+  const cPN=`<div class="rc${bPN?' win':''}">
+    <div class="rh hn">
+      <div class="rht" style="color:#92400e">Paušalni obrt</div>
+      <div class="rhs">Vladini paket (najava)</div>
+      <span class="rhb ${pn.diff>0?'bx':'bn'}">${pn.diff>0?'↑ +'+fmt(pn.diff)+' više':'Bez promjene'}</span>
+    </div>
+    <div class="rb">
+      ${rr('Prihodi',inc)}
+      ${rr('<strong>Obveze prema državi</strong>',pn.obl,'n','hl')}
+      ${pn.diff>0?`<div class="rr sub"><span class="rl">— Povećanje novim paketom</span><span class="rv" style="color:#d97706">+${fmt(pn.diff)}</span></div>`:''}
+      ${hE?rr('Trošak zaposlenika',empC,'n'):''}
+      ${hC?rr('Poslovni troškovi',costs,'n'):''}
+      ${neop.nEmp>0?rr('Neoporezive – zaposlenici',neop.nEmp,'n'):''}
+      ${neop.nOwn>0?`<div class="rr thl"><span class="rl">Neoporezive – vlasnik</span><span class="rv t">↩ ostaje vlasniku</span></div>`:''}
+      <div class="rtot"><span class="tl">Ukupni odljev</span><span class="tv">${fmt(pn.out)}</span></div>
+      ${neop.nOwn>0?`<div class="nonb">⚠ U paušalu nema porezne uštede od neoporezivih isplata vlasniku (${fmt(neop.nOwn)}/god.).</div>`:''}
+      ${nb(pn.neto, neop.nOwn, 0)}
+    </div>
+  </div>`;
+
+  // ----- DOHODOVNI -----
+  const cDoh=`<div class="rc${bDoh?' win':''}">
+    <div class="rh hd">
+      <div class="rht" style="color:#065f46">Dohodovni obrt</div>
+      <div class="rhs">Stvarni troškovi odbitni · ${(tr*100).toFixed(0)}% porez</div>
+      <span class="rhb ${bDoh?'bw':'bn'}">${bDoh?'✓ Povoljniji':'Dohodovni'}</span>
+    </div>
+    <div class="rb">
+      ${rr('Prihodi',inc)}
+      ${hC?rr('Poslovni troškovi ✓',costs,'','hl'):''}
+      ${hE?rr('Trošak zaposlenika ✓',empC,'','hl'):''}
+      ${neop.nEmp>0?`<div class="rr hl"><span class="rl">Neoporezive – zaposlenici ✓ odbitno</span><span class="rv n">${fmt(neop.nEmp)}</span></div>`:''}
+      ${neop.nOwn>0?`
+        <div class="rr thl">
+          <span class="rl"><strong>Neoporezive – vlasnik ✓ rashod + ↩ ostaje</strong></span>
+          <span class="rv t">${fmt(neop.nOwn)}</span>
+        </div>
+        <div class="rr sub" style="background:var(--teal-light)">
+          <span class="rl" style="color:#0e7490">→ smanjuje poreznu osnovicu za ${fmt(neop.nOwn)}, porezna ušteda:</span>
+          <span class="rv" style="color:#047857;font-weight:700">+${fmt(neop.own_saving)}</span>
+        </div>`:''}
+      ${rr('Doprinosi vlasnika ✓',doh.cont,'n')}
+      ${rr('Dohodak od sampost. djel.',Math.max(0,doh.dohodak),'','hl')}
+      ${rr('— Osobni odbitak'+(cExt>0?' + djeca':''),Math.min(osobni,Math.max(0,doh.dohodak)),'','sub')}
+      ${cExt>0?`<div class="rr sub"><span class="rl" style="color:#047857">  (baza ${fmt(BASE_O)} + djeca +${fmt(cExt)})</span></div>`:''}
+      ${rr('— Oporezivi dohodak',doh.tb,'','sub')}
+      ${rr('<strong>Porez na dohodak ('+  (tr*100).toFixed(0)+'%)</strong>',doh.porez,'n','ghl')}
+      <div class="rtot"><span class="tl">Ukupni odljev</span><span class="tv">${fmt(doh.out)}</span></div>
+      ${neop.nOwn>0?`
+        <div class="nob">
+          <div class="ntitle">💰 Neoporezive isplate vlasniku – ukupni učinak:</div>
+          <div class="nob-row"><span>Ostaje vlasniku (rashod):</span><span class="nv">+${fmt(neop.nOwn)}</span></div>
+          <div class="nob-row"><span>Porezna ušteda (${(tr*100).toFixed(0)}%):</span><span class="nv" style="color:#047857">+${fmt(neop.own_saving)}</span></div>
+          <div class="nob-row" style="border-top:1px solid #a5f3fc;padding-top:.2rem;margin-top:.2rem"><span><strong>Ukupna korist vs. bez neoporezivih:</strong></span><span class="nv" style="color:#047857">+${fmt(neop.own_saving)}</span></div>
+          <div style="font-size:.68rem;color:#6b7280;margin-top:.2rem">Novac (${fmt(neop.nOwn)}) je već uključen u neto – prikazana je samo porezna ušteda kao ekstra korist.</div>
+        </div>`:''}
+      ${nb(doh.neto, neop.nOwn, neop.own_saving)}
+    </div>
+  </div>`;
+
+  document.getElementById('rGrid').innerHTML=cPS+cPN+cDoh;
+  renderComp(d);
+  renderRec(d);
+}
+
+function rr(label,val,cls='',extra=''){
+  return`<div class="rr${extra?' '+extra:''}"><span class="rl">${label}</span><span class="rv${cls?' '+cls:''}">${fmt(val)}</span></div>`;
+}
+
+function nb(neto, nOwn, saving){
+  const pos=neto>=0;
+  let note='';
+  if(nOwn>0){
+    if(saving>0) note=`<div class="nb-note">Neto uključuje ${fmt(nOwn)} neoporezivih primitaka · porezna ušteda: +${fmt(saving)}</div>`;
+    else         note=`<div class="nb-note">Neto uključuje ${fmt(nOwn)} neoporezivih primitaka (bez porezne uštede u paušalu)</div>`;
+  }
+  return`<div class="nb ${pos?'pos':'neg'}">
+    <div class="nl">Ostaje vlasniku (neto)</div>
+    <div class="ne">${fmt(neto)}</div>
+    <div class="nm">${fmt(neto/12)} / mj</div>
+    ${note}
+  </div>`;
+}
+
+// ============================================================
+// COMPARISON BARS
+// ============================================================
+function renderComp(d){
+  const{ps,pn,doh}=d;
+  const bars=[
+    {name:'Paušal – stari sustav', val:ps.obl,    neto:ps.neto,  c:'#2563eb'},
+    {name:'Paušal – novi paket',   val:pn.obl,    neto:pn.neto,  c:'#d97706'},
+    {name:'Dohodovni obrt',        val:doh.stObl, neto:doh.neto, c:'#047857'},
+  ];
+  const mx=Math.max(...bars.map(b=>b.val));
+  const bn=Math.max(...bars.map(b=>b.neto));
+  const bH=bars.map(b=>{
+    const p=mx>0?Math.round(b.val/mx*100):0;
+    return`<div class="brow">
+      <div class="bmeta"><span style="font-weight:500">${b.name}</span><span style="font-weight:700;color:${b.c}">${fmt(b.val)}</span></div>
+      <div class="btrack"><div class="bfill" style="width:${p}%;background:${b.c}">${p>15?p+'%':''}</div></div>
+    </div>`;
+  }).join('');
+  const nH=bars.map(b=>{
+    const best=Math.abs(b.neto-bn)<.01;
+    return`<div class="nrow${best?' best':''}"><span>${b.name}${best?' ✓':''}</span><span class="nrv ${b.neto>=0?'p':'ng'}">${fmt(b.neto)}</span></div>`;
+  }).join('');
+  document.getElementById('compSection').innerHTML=`
+    <h3>📊 Usporedba obveza prema državi (porez + doprinosi vlasnika)</h3>
+    <p style="font-size:.76rem;color:#9ca3af;margin-bottom:.8rem">Samo porezi i doprinosi vlasnika – bez troškova poslovanja, zaposlenika i neoporezivih isplata.</p>
+    ${bH}
+    <div class="ncmp"><h4>Neto vlasniku (sve uključeno)</h4>${nH}</div>`;
+}
+
+// ============================================================
+// PREPORUKA
+// ============================================================
+function renderRec(d){
+  const{inc,costs,empC,neop,ps,pn,doh}=d;
+  const realCosts=costs+empC+neop.nEmp;
+  const cr=inc>0?realCosts/inc:0;
+  const newPk=pn.diff>0;
+  const dBetterNew=doh.neto>pn.neto;
+  const dBetterOld=doh.neto>ps.neto;
+  const highC=cr>0.35;
+  const hasOwnNeop=neop.nOwn>0;
+
+  let title,body;
+  if(!newPk && !dBetterOld){
+    title='🔵 Paušalni obrt ostaje povoljniji';
+    body=`<p>Za ovaj prihodovni razred vladini paket <strong>ne donosi promjene</strong>. Paušal ima niže obveze i jednostavniju administraciju.</p>
+    ${hasOwnNeop?`<p>Napomena: neoporezive isplate vlasniku u paušalu ne donose poreznu uštedu (${fmt(neop.nOwn)}/god.). U dohodovnom bi isti iznos donio <strong>+${fmt(neop.own_saving)}/god. porezne uštede</strong>. Ako planirate povećati te isplate, razlika postaje sve relevantnija.</p>`:''}`;
+  } else if(newPk && dBetterNew && highC){
+    title='✅ Dohodovni obrt bi mogao biti povoljniji – razmotrite prelazak';
+    body=`<p>Vladini paket povećava obveze za <strong>${fmt(pn.diff)}/god.</strong> Uz visoke poslovne troškove (${(cr*100).toFixed(0)}% prihoda koji su odbitni u dohodovnom), dohodovni nudi <strong>${fmt(doh.neto-pn.neto)} više</strong> neto prihoda godišnje.</p>
+    ${hasOwnNeop?`<p>Neoporezive isplate vlasniku u dohodovnom donose i <strong>+${fmt(neop.own_saving)}/god. porezne uštede</strong> – u paušalu tog nema.</p>`:''}
+    <p><strong>Prednosti dohodovnog:</strong> svi troškovi odbitni · neoporezive smanjuju poreznu osnovicu · djeca na PK kartici smanjuju porez.<br><strong>Nedostaci:</strong> obavezno vođenje poslovnih knjiga · viši doprinosi vlasnika (${fmt(DOH_C)}/god.).</p>`;
+  } else if(newPk && !dBetterNew){
+    title='⚠️ Paušal ostaje povoljniji unatoč povećanju';
+    body=`<p>Unatoč povećanju (+${fmt(pn.diff)}/god.), paušal i dalje daje više neto prihoda od dohodovnog za vašu situaciju.</p>
+    ${hasOwnNeop?`<p>Jedina prednost dohodovnog u ovom scenariju: neoporezive isplate vlasniku daju <strong>+${fmt(neop.own_saving)}/god. porezne uštede</strong>. Nije dovoljno da prebaci prevagu.</p>`:''}`;
+  } else if(dBetterNew){
+    title='🔄 Razmotrite prelazak na dohodovni obrt';
+    body=`<p>Dohodovni daje <strong>${fmt(doh.neto-pn.neto)} više</strong> neto prihoda godišnje.
+    ${hasOwnNeop?' Tome pridonosi i porezna ušteda od neoporezivih isplata vlasniku: <strong>+'+fmt(neop.own_saving)+'/god.</strong>':''}
+    Preporuča se analiza s knjigowođom.</p>`;
+  } else {
+    title='💡 Usporedba scenarija';
+    body=`<p>Razlike su minimalne. Konzultirajte se s knjigowođom.</p>`;
+  }
+  document.getElementById('recSection').innerHTML=`<div class="rec"><h3>${title}</h3>${body}</div>`;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderCBtns(); renderEmps(); calc();
+</script>
+
+</body>
+</html>
